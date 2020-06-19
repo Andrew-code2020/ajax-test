@@ -1,22 +1,46 @@
-function getData(cb) {
-  var xhr = new XMLHttpRequest();
+const baseURL = "https://ci-swapi.herokuapp.com/api/";
 
-  xhr.open(
-    "GET",
-    "https://ci-swapi.herokuapp.com/api/"
-  ); /*GET standard method to get soemthing from the browser POST sends data to server*/
-  xhr.send();
+function getData(type, cb) {
+    var xhr = new XMLHttpRequest();
 
-  xhr.onreadystatechange = function () {
-    if (this.readyState == 4 && this.status == 200) {
-      cb(JSON.parse(this.responseText));
-    }
-  };
+    xhr.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            cb(JSON.parse(this.responseText));
+        }
+    };
+
+    xhr.open("GET", baseURL + type + "/");
+    xhr.send();
 }
 
-function printDataToConsole(data){
-    console.log(data);
+function getTableHeaders(obj) {
+    var tableHeaders = [];
+
+    Object.keys(obj).forEach(function(key) {
+        tableHeaders.push(`<td>${key}</td>`)
+    });
+
+    return `<tr>${tableHeaders}</tr>`;
 }
 
-getData (printDataToConsole);
+function writeToDocument(type) {
+    var tableRows = [];
+    var el = document.getElementById("data");
+    el.innerHTML = "";
+
+    getData(type, function(data) {
+        data = data.results;
+        var tableHeaders = getTableHeaders(data[0]);
+
+        data.forEach(function(item) {
+            var dataRow =[];
+            Object.keys(item).forEach(function(key){
+                dataRow.push(`<td>${item[key]}</td>`);
+            });
+            tableRows.push(dataRow);
+        });
+
+        el.innerHTML = `<table>${tableHeaders}</table>`;
+    });
+}
 
